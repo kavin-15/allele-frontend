@@ -34,38 +34,37 @@ const AlcoholHeatmap = () => {
     if (!heatmapData) return null;
 
     if (heatmapData.type === "multi") {
-        const allCountries = [];
-        const allZRows = [];
-        let xLabels = [];
-
-        heatmapData.data.forEach(trace => {
-            if (!xLabels.length) xLabels = trace.xLabels; // use x from first trace
-            trace.yLabels.forEach((country, i) => {
-            allCountries.push(`${country} (${trace.continent})`);
-            allZRows.push(trace.zData[i]);
-            });
-        });
-
-    return (
-        <Plot
-        data={[
-            {
-            x: xLabels,
-            y: allCountries,
-            z: allZRows,
-            type: "heatmap",
-            colorscale: "Viridis",
-            showscale: true
-            }
-        ]}
-        layout={{
-            title: "Alcohol Consumption – All Continents",
-            width: 1000,
-            height: allCountries.length * 30, // dynamic height
-            margin: { t: 50, l: 150, r: 50, b: 0 }
-        }}
+      const containerStyle = {
+        display:"grid",
+        gridTemplateColumns:"repeat(2, 1fr)",
+        justifyItems: "center",
+        gap: "30px",
+        marginTop: "30px"
+      };
+      return (
+        <div style ={containerStyle}>
+          {heatmapData.data.map((trace, idx) => (
+            <Plot
+              key={idx}
+              data={[
+                {
+                  x: trace.xLabels,
+                  y: trace.yLabels,
+                  z: trace.zData,
+                  type: "heatmap",
+                  colorscale: colorScales[trace.continent] || "Viridis",
+                  showscale: false
+                }
+              ]}
+              layout={{
+                title: `Alcohol Consumption – ${trace.continent}`,
+                width: 700,
+                height: 400
+              }}
         />
-    );
+      ))}
+      </div>
+      );
     }
 
     if (heatmapData.type === "single") {
@@ -93,14 +92,6 @@ const AlcoholHeatmap = () => {
 
     return null;
   };
-
-  const containerStyle = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(700px, 1fr))",
-  gap: "40px",
-  marginTop: "20px"
-};
-
 
   return (
     <div style={{ padding: "20px" }}>
