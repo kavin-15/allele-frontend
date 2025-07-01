@@ -66,12 +66,12 @@
 // export default App;
 
 import React from "react";
-import AlcoholHeatmap from "./components/AlcoholHeatMap.js";
+import AlleleHeatmap from "./components/AlcoholHeatMap";
 
 function App() {
   return (
     <div>
-      <AlcoholHeatmap />
+      <AlleleHeatmap />
     </div>
   );
 }
