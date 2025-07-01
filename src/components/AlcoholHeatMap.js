@@ -153,7 +153,16 @@ const AlcoholHeatmap = () =>{
           x: continents,
           y: ["Allele Frequency"],
           type: "heatmap",
-          colorscale: "Viridis",
+          colorscale: [
+            [0, 'rgb(68, 1, 84)'],
+            [0.3, 'rgb(59, 82, 139)'],
+            [0.5, 'rgb(33, 145, 140)'],
+            [0.7, 'rgb(94, 201, 98)'],
+            [0.9, 'rgb(253, 231, 37)'],
+            [1, 'rgb(255, 255, 255)']
+          ],
+          zmin: 0.3,
+          zmax: 1.0,
           showscale: true,
           text: frequencies.map(f => f.toFixed(3)),
           hoverinfo: "x+y+text"
@@ -175,6 +184,7 @@ const AlcoholHeatmap = () =>{
     />
   );
 };
+
 
 
 
