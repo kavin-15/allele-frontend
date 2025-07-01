@@ -113,21 +113,20 @@ import Plot from "react-plotly.js";
 // };
 
 const AlcoholHeatmap = () =>{
-  const [variantId, setVariantId] = useState("4-99318162-T-C");
+  // const [variantId, setVariantId] = useState("4-99318162-T-C");
   const [freqData, setfreqData] = useState(null);
   const [loading, setloading] = useState(false);
 
-  const exampleVariants = [
-    {id: "4-99318162-T-C", label: "ADH1B Variant"},
-    {id: "4-100239319-T-C", label: "Another Example of Variant"}
-  ];
+  // const exampleVariants = [
+  //   {id: "4-99318162-T-C", label: "ADH1B Variant"},
+  //   {id: "4-100239319-T-C", label: "Another Example of Variant"}
+  // ];
   useEffect(()=>{
+    console.log("Fetching data");
     const fetchData = async() =>{
       setloading(true);
       try{
-        const res = await axios.get("http://localhost:8000/allele-frequency",{
-          params:{variant_id: variantId}
-        });
+        const res = await axios.get("http://localhost:8000/allele-frequency-multi");
         console.log("Data recieved:", res.data);
         setfreqData(res.data.frequencies);
       } catch(err){
@@ -137,78 +136,58 @@ const AlcoholHeatmap = () =>{
       }
     };
     fetchData();
-  }, [variantId]);
+  }, []);
 
   const renderPlot = () => {
   if (!freqData) return null;
 
-  const continents = Object.keys(freqData);
-  const frequencies = continents.map(cont => freqData[cont]);
+  const variantLabels = {
+    "4-99318162-T-C": "rs1229984 (ADH1B)",
+    "1-11856378-G-A": "rs1801133 (MTHFR)",
+    "11-5227002-T-A": "rs334 (HBB)",
+    "1-169519049-G-A": "rs6025 (Factor V Leiden)",
+    "19-45412079-T-C": "rs7412 (APOE)",
+    "19-45411941-T-C": "rs429358 (APOE)",
+    "12-112241766-G-A": "rs671 (ALDH2)"
+  };
 
+  const variants = Object.keys(freqData);
+  const yLabels = variants.map(v => variantLabels[v] || v);
+  const xLabels = ["AFR", "AMR", "EAS", "NFE", "SAS"];
+  const zData = variants.map(variant => 
+    xLabels.map(cont => freqData[variant][cont] || 0)
+  );
+  console.log("Heatmap rendering", freqData);
   return (
     <Plot
       data={[
         {
-          z: [frequencies],
-          x: continents,
-          y: ["Allele Frequency"],
+          z: zData,
+          x: xLabels,
+          y: yLabels,
           type: "heatmap",
-          colorscale: [
-            [0, 'rgb(68, 1, 84)'],
-            [0.3, 'rgb(59, 82, 139)'],
-            [0.5, 'rgb(33, 145, 140)'],
-            [0.7, 'rgb(94, 201, 98)'],
-            [0.9, 'rgb(253, 231, 37)'],
-            [1, 'rgb(255, 255, 255)']
-          ],
-          zmin: 0.3,
-          zmax: 1.0,
+          colorscale: "Viridis",
           showscale: true,
-          text: frequencies.map(f => f.toFixed(3)),
+          text: zData.map(row => row.map(val => val.toFixed(3))),
           hoverinfo: "x+y+text"
         }
       ]}
       layout={{
-        title: `Allele Frequency Heatmap for ${variantId}`,
-        width: 700,
-        height: 300,
-        xaxis: {
-          title: "Continent",
-          tickangle: -45
-        },
-        yaxis: {
-          visible: false
-        },
-        margin: { t: 50, l: 50, r: 50, b: 50 }
+        title: "Allele Frequency Heatmap Across Variants and Continents",
+        width: 900,
+        height: yLabels.length * 50 + 150,
+        xaxis: { title: "Continent", tickangle: -45 },
+        yaxis: { title: "Variants", automargin: true },
+        margin: { t: 60, l: 200, r: 50, b: 100 }
       }}
     />
   );
 };
-
-
-
-
-
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>Allele Frequency Visualizer</h2>
-      <label>
-        Select Variant:
-        <select
-          value={variantId}
-          onChange={(e) => setVariantId(e.target.value)}
-          style={{ marginLeft: "10px" }}
-        >
-          {exampleVariants.map((variant) => (
-            <option key={variant.id} value={variant.id}>
-              {variant.label}
-            </option>
-          ))}
-        </select>
-      </label>
-
-      {loading ? <p>Loading allele frequency data...</p> : renderPlot()}
-    </div>
-  );
+  <div style={{ padding: "20px" }}>
+    <h2>Allele Frequency Visualizer (Multi-Variant Heatmap)</h2>
+    {loading ? <p>Loading allele frequency data...</p> : renderPlot()}
+  </div>
+);
 }
 export default AlcoholHeatmap;
