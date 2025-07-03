@@ -128,7 +128,7 @@ const AlcoholHeatmap = () =>{
       try{
         const res = await axios.get("http://localhost:8000/allele-frequency-multi");
         console.log("Data recieved:", res.data);
-        setfreqData(res.data.frequencies);
+        setfreqData(res.data);
       } catch(err){
         console.error("Error fetching allele data", err);
       }finally{
@@ -139,6 +139,7 @@ const AlcoholHeatmap = () =>{
   }, []);
 
   const renderPlot = () => {
+    
   if (!freqData) return null;
 
   const variantLabels = {
@@ -154,9 +155,14 @@ const AlcoholHeatmap = () =>{
   const variants = Object.keys(freqData);
   const yLabels = variants.map(v => variantLabels[v] || v);
   const xLabels = ["AFR", "AMR", "EAS", "NFE", "SAS"];
-  const zData = variants.map(variant => 
-    xLabels.map(cont => freqData[variant][cont] || 0)
-  );
+  // const zData = variants.map(variant => 
+  //   xLabels.map(cont => freqData[variant][cont] || 0)
+  // );
+  const zData = variants.map(variant =>
+        xLabels.map(cont => freqData[variant]?.[cont] ?? 0)
+    );
+  // const minVal = Math.min(...zData.flat());
+  // const maxVal = Math.max(...zData.flat());
   console.log("Heatmap rendering", freqData);
   return (
     <Plot
@@ -168,6 +174,8 @@ const AlcoholHeatmap = () =>{
           type: "heatmap",
           colorscale: "Viridis",
           showscale: true,
+          zmin: 0,
+          zmax: 0.5,
           text: zData.map(row => row.map(val => val.toFixed(3))),
           hoverinfo: "x+y+text"
         }
